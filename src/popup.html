@@ -1,10 +1,64 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" type="text/css" href="styles/style.css"/>
+    <!-- <link rel="stylesheet" type="text/css" href="styles/style.css"/> -->
+    <link rel="stylesheet" type="text/css" href="styles/feedly.css"/>
 </head>
 <body>
+
+<div class="popup">
+    <div class="popup__header header">
+        <div id="feedly" class="header__logo logo">
+            <svg class="logo__icon" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" enable-background="new 0 0 128 128" id="Social_Icons" version="1.1" viewBox="0 0 128 128" xml:space="preserve"><g id="_x33__stroke"><g id="Feedly_1_"><rect clip-rule="evenodd" fill="none" fill-rule="evenodd" height="128" width="128"/><path clip-rule="evenodd" d="M120.738,58.4    c-14.644-14.509-29.292-29.009-43.924-43.522c-2.14-2.084-4.152-4.461-6.976-5.654c-2.804-1.319-6.056-1.51-9.068-0.872    c-2.636,0.598-5.016,2.029-6.92,3.914C37.385,28.579,20.917,44.894,4.445,61.202c-1.896,1.874-3.376,4.216-3.98,6.819    c-1.352,4.687,0.344,9.941,3.812,13.316c11.608,11.502,23.228,22.991,34.832,34.501c2.592,2.619,6.248,4.144,9.956,4.101    c9.496,0.055,18.988-0.008,28.48,0.032c4.272,0.269,8.592-1.244,11.616-4.275c10.52-10.388,21.008-20.816,31.524-31.212    c1.712-1.719,3.568-3.332,4.964-5.329c2.56-3.653,2.984-8.578,1.488-12.718C125.97,63.111,123.162,60.817,120.738,58.4     M38.521,76.923c-1.788,2.108-4.932,1.553-7.352,1.181c-2.132-1.692-4.084-3.653-5.804-5.749c-0.996-1.161,0.28-2.369,1.068-3.189    c10.832-10.681,21.624-21.41,32.436-32.108c1.452-1.403,2.768-2.96,4.4-4.16c1.404-0.697,2.488,0.808,3.424,1.609    c1.988,2.1,4.24,3.962,6.064,6.208c0.94,1.113-0.092,2.405-0.916,3.201C60.725,54.906,49.601,65.896,38.521,76.923     M72.606,102.236c-1.728,1.926-3.532,3.815-5.56,5.424c-1.864,0.444-3.844,0.341-5.728,0.071c-1.812-0.907-3.036-2.651-4.52-3.994    c-1.056-1.018-2.708-2.548-1.348-4.017c2.296-2.528,4.752-4.941,7.292-7.239c0.944-0.788,2.356-0.396,3.12,0.46    c2.172,2.08,4.308,4.196,6.404,6.359C73.09,100.025,73.542,101.4,72.606,102.236 M71.958,73.404    c-6.168,6.101-12.356,12.195-18.488,18.336c-1.72,2.092-4.752,1.43-7.112,1.236c-2.276-1.45-4.044-3.593-5.872-5.547    c-1.22-1.145-0.08-2.643,0.86-3.502c6.176-6.093,12.344-12.187,18.488-18.312c1.12-1.082,2.132-2.326,3.488-3.146    c1.36-0.578,2.352,0.792,3.256,1.561c2.052,2.179,4.392,4.097,6.264,6.43C73.666,71.503,72.71,72.667,71.958,73.404" fill="#2BB24C" fill-rule="evenodd" id="Feedly"/></g></g></svg>
+        </div>
+        <div class="header__toolbar toolbar" style="display:none">
+            <div id="open-all-news" class="toolbar__item" title="">
+                <svg class="toolbar__action" viewBox="0 0 24 24">
+                    <path fill="#6F6F6F" d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z"></path>
+                </svg>
+            </div>
+            <div id="open-all-saved-news" class="toolbar__item" title="" display="none">
+                <svg class="toolbar__action" viewBox="0 0 24 24">
+                    <path fill="#6F6F6F" d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z"></path>
+                </svg>
+            </div>
+            <div id="mark-all-read" class="toolbar__item" title="">
+                <svg class="toolbar__action" viewBox="0 0 24 24">
+                    <path fill="#6F6F6F" d="M0.41,13.41L6,19L7.41,17.58L1.83,12M22.24,5.58L11.66,16.17L7.5,12L6.07,13.41L11.66,19L23.66,7M18,7L16.59,5.58L10.24,11.93L11.66,13.34L18,7Z"></path>
+                </svg>
+            </div>
+            <div id="update-feeds" class="toolbar__item" title="">
+                <svg class="toolbar__action" viewBox="0 0 24 24">
+                    <path fill="#6F6F6F" d="M12,6V9L16,5L12,1V4A8,8 0 0,0 4,12C4,13.57 4.46,15.03 5.24,16.26L6.7,14.8C6.25,13.97 6,13 6,12A6,6 0 0,1 12,6M18.76,7.74L17.3,9.2C17.74,10.04 18,11 18,12A6,6 0 0,1 12,18V15L8,19L12,23V20A8,8 0 0,0 20,12C20,10.43 19.54,8.97 18.76,7.74Z"></path>
+                </svg>
+            </div>
+            <div id="open-options" class="toolbar__item" title="">
+                <svg class="toolbar__action" viewBox="0 0 24 24">
+                    <path fill="#6F6F6F" d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+    <div class="popup__content">
+        <div class="tab-container">
+            <div id="tab-feed" class="tab-container__item tab tab--selected">Feed</div>
+            <div id="tab-saved-feed" class="tab-container__item tab">Saved</div>
+        </div>
+        <div id="feed" class="feed">
+        </div>
+        <div id="feed-saved" class="feed">
+        </div>
+        <div id="empty" class="feed feed--empty">
+        </div>
+    </div> 
+</div>
 <div id="login">
+    <button id="login-btn" class="button">Login</button>
+</div>
+<div id="loading">
+    <img src="/images/loading.gif" alt="loading...">
+</div>
+<!-- <div id="login">
     <button id="login-btn" class="button">Login</button>
 </div>
 <div id="popup-content">
@@ -30,37 +84,56 @@
 </div>
 <div id="loading">
     <img src="/images/loading.gif" alt="loading...">
-</div>
+</div> -->
 </body>
 
 <script src="scripts/jquery.min.js"></script>
 <script src="scripts/mustache.min.js"></script>
 <script id="feedTemplate" type="text/x-handlebars-template">
     {{#feeds}}
-    <div class="item" data-id="{{id}}" data-categories="{{#categories}}{{encodedId}} {{/categories}}">
-        <span class="article-title {{titleDirection}}">
-            <a data-link="{{url}}" class="title">{{title}}</a>
-        </span>
-        <span class="article-menu">
-            <span class="save-feed {{#isSaved}} saved {{/isSaved}}" data-saved="{{isSaved}}"></span>
-            <span class="mark-read" title="Mark as read"></span>
-            <span class="show-content" title="Show content"></span>
-        </span>
-
-        <div class="blog-title {{blogTitleDirection}}">
-            <img class="blog-icon" src="{{blogIcon}}"/>
-            <a data-link="{{blogUrl}}" href="javascript:void(0)">{{blog}}</a>,
-            <span class="timeago" title="{{isoDate}}"></span>
+    <article class="feed__article article {{#isSaved}} article--saved {{/isSaved}}" data-id="{{id}}" data-is-saved="{{isSaved}}" data-categories="{{#categories}}{{encodedId}} {{/categories}}">
+        <div class="article__header">
+            <h1 class="article__title">
+                <a title="{{title}}" data-link="{{url}}" >{{title}}</a>
+            </h1>
+            <div class="article__toolbar toolbar">
+                <div class="toolbar__item js-toolbar__action--save">
+                    <svg class="toolbar__action" viewBox="0 0 24 24">
+                            <path fill="#6F6F6F" d="M17,18L12,15.82L7,18V5H17M17,3H7A2,2 0 0,0 5,5V21L12,18L19,21V5C19,3.89 18.1,3 17,3Z"></path>
+                        </svg>
+                </div>
+                <div class="toolbar__item js-toolbar__action--mark-as-readed">
+                    <svg class="toolbar__action" viewBox="0 0 24 24">
+                        <path fill="#6F6F6F" ng-attr-d="{{icon.data}}" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path>
+                    </svg>
+                </div>
+                <div class="toolbar__item js-toolbar__action--expand" id="expand">
+                    <svg class="toolbar__action" style="padding: 0; width:24px; height:24px" viewBox="0 0 24 24">
+                            <path fill="#6F6F6F" d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"></path>
+                        </svg>
+                </div>
+            </div>    
         </div>
-        <div class="content">{{> content}}</div>
-    </div>
+        <div class="article__details">
+            <a class="article__source source link" data-link="{{blogUrl}}" href="javascript:void(0)">
+                <img class="source__icon" src="{{blogIcon}}"/>
+                <span class="source__text">{{blog}},&nbsp;</span>
+            </a>
+            <span class="article__date" title="{{isoDate}}">
+            </span>
+            <span>
+                
+            </span>
+        </div>
+        <div class="article__content">{{> content}}</div>
+    </article>
     {{/feeds}}
 </script>
 <script type="text/x-handlebars-template" id="categories-template">
     <div class="categories">
-        <span class="active">All</span>
+        <span class="categories__category feed-category feed-category--selected">All</span>
         {{#categories}}
-        <span data-id="{{encodedId}}">{{label}}</span>
+        <span class="categories__category feed-category" data-id="{{encodedId}}">{{label}}</span>
         {{/categories}}
     </div>
 </script>
