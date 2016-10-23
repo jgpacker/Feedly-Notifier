@@ -80,12 +80,14 @@ function loadUserCategories(){
 }
 
 function appendCategory(id, label){
-    var categories = $("#categories");
-    var label = $("<label for='" + id + "' class='label' />").text(label);
-    var checkbox = $("<input id='" + id + "' type='checkbox' />").attr("data-id", id);
-    categories.append(label);
-    categories.append(checkbox);
-    categories.append("<br/>");
+    var $categories = $("#categories");
+    var $row = $('<div class="options__row"></div>');
+    var $label = $('<div class="options__cell"></div>')
+                    .html("<label for='" + id + "' class='label label--child'>" + label + "</label>");
+    var $checkbox = $('<div class="options__cell"></div>')
+                        .html("<input id='" + id + "' type='checkbox' data-id='" + id + "' />");
+    $row.append($label).append($checkbox);
+    $categories.append($row);
 }
 
 function parseFilters() {

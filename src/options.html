@@ -1,121 +1,298 @@
 <!DOCTYPE html>
 
 <html>
+
 <head>
     <title></title>
-    <link rel="stylesheet" type="text/css" href="styles/options.css"/>
-    <link rel="stylesheet" type="text/css" href="styles/style.css"/>
+    <link rel="stylesheet" type="text/css" href="styles/options.css" />
+    <link rel="stylesheet" type="text/css" href="styles/style.css" />
 </head>
 
 <body id="options-page">
-    <div id="container">
-        <div id="header">
+    <div class="header">
+        <div class="container">
+            <div id="donate">
+                <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+                    <input type="hidden" name="cmd" value="_s-xclick">
+                    <input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
+                    ">
+                    <input type="image" src="https://www.paypalobjects.com/en_US/RU/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+                    <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+                </form>
+            </div>
+            <h1 id="header" class="header__title"></h1>
         </div>
-        <div id="donate">
-            <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
-                <input type="hidden" name="cmd" value="_s-xclick">
-                <input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
-">
-                <input type="image" src="https://www.paypalobjects.com/en_US/RU/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
-                <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
-            </form>
-        </div>
-        <form id="options">
-            <div class="options-section">
-                <h3 data-locale-value="General"></h3>
-                <label for="updateInterval" class="label" data-locale-value="IntervalPeriod"></label>:
-                <input id="updateInterval" type="number" min="10" max="120" data-option-name="updateInterval" /><br>
+    </div>
 
-                <label for="markReadOnClick" class="label" data-locale-value="AutoMarkRead"></label>
-                <input id="markReadOnClick" type="checkbox" data-option-name="markReadOnClick" /><br>
+    <div id="container" class="container main">
+        <form id="options" class="options">
+            <div class="options-section options__sections">
+                <section class="options__section">
+                    <h3 class="options__section-title" data-locale-value="General"></h3>
 
-                <label for="showCounter" class="label" data-locale-value="ShowCounter"></label>
-                <input id="showCounter" type="checkbox" data-option-name="showCounter" /><br>
+                    <div class="options__row">
+                        <div class="options__cell">
+                            <label for="updateInterval" class="label" data-locale-value="IntervalPeriod"></label>
+                        </div>
+                        <div class="options__cell">
+                            <input id="updateInterval" type="number" min="10" max="120" data-option-name="updateInterval" />
+                        </div>
+                    </div>
 
-                <label for="resetCounterOnClick" class="label" data-locale-value="ResetCounterOnClick"></label>
-                <input id="resetCounterOnClick" type="checkbox" data-enable-parent="showCounter" data-option-name="resetCounterOnClick" /><br>
+                    <div class="options__row">
+                        <div class="options__cell">
+                            <label for="markReadOnClick" class="label" data-locale-value="AutoMarkRead"></label>
+                        </div>
+                        <div class="options__cell">
+                            <input id="markReadOnClick" type="checkbox" data-option-name="markReadOnClick" />
+                            <br>
+                        </div>
+                    </div>
 
-                <label for="useSecureConnection" class="label" data-locale-value="UseSecureConnection"></label>
-                <input id="useSecureConnection" type="checkbox" data-option-name="useSecureConnection" /><br>
+                    <div class="options__row">
+                        <div class="options__cell">
+                            <label for="showCounter" class="label" data-locale-value="ShowCounter"></label>
+                        </div>
+                        <div class="options__cell">
+                            <input id="showCounter" type="checkbox" data-option-name="showCounter" />
+                            <br>
+                        </div>
+                    </div>
 
-                <!-- @if BROWSER='chrome' -->
-                <label for="enable-background-mode" class="label" data-locale-value="EnableBackgroundMode"></label>
-                <input type="checkbox" id="enable-background-mode" />
-                <!-- @endif -->
+                    <div class="options__row">
+                        <div class="options__cell">
+                            <label for="resetCounterOnClick" class="label" data-locale-value="ResetCounterOnClick"></label>
+                        </div>
+                        <div class="options__cell">
+                            <input id="resetCounterOnClick" type="checkbox" data-enable-parent="showCounter" data-option-name="resetCounterOnClick" />
+                            <br>
+                        </div>
+                    </div>
 
-                <h3 data-locale-value="Popup"></h3>
-                <label for="openSiteOnIconClick" class="label" data-locale-value="OpenSiteOnIconClick"></label>
-                <input id="openSiteOnIconClick" type="checkbox" data-option-name="openSiteOnIconClick" /><br>
+                    <div class="options__row">
+                        <div class="options__cell">
+                            <label for="useSecureConnection" class="label" data-locale-value="UseSecureConnection"></label>
+                        </div>
+                        <div class="options__cell">
+                            <input id="useSecureConnection" type="checkbox" data-option-name="useSecureConnection" />
+                            <br>
+                        </div>
+                    </div>
 
-                <label for="openFeedsInBackground" class="label" data-locale-value="OpenFeedsInBackground"></label>
-                <input id="openFeedsInBackground" type="checkbox" data-disable-parent="openSiteOnIconClick" data-option-name="openFeedsInBackground" /><br>
+                    <!-- @if BROWSER='chrome' -->
+                    <div class="options__row">
+                        <div class="options__cell">
+                            <label for="enable-background-mode" class="label" data-locale-value="EnableBackgroundMode"></label>
+                        </div>
+                        <div class="options__cell">
+                            <input type="checkbox" id="enable-background-mode" />
+                        </div>
+                    </div>
+                    <!-- @endif -->
+                </section>
 
-                <label for="abilitySaveFeeds" class="label" data-locale-value="AbilitySaveFeeds"></label>
-                <input id="abilitySaveFeeds" type="checkbox" data-disable-parent="openSiteOnIconClick" data-option-name="abilitySaveFeeds" /><br>
+                <section class="options__section">
+                    <h3 class="options__section-title" data-locale-value="Popup"></h3>
 
-                <label for="maxNumberOfFeeds" class="label" data-locale-value="MaxNumberOfFeeds"></label>:
-                <input id="maxNumberOfFeeds" type="number" data-disable-parent="openSiteOnIconClick" min="1" max="60" data-option-name="maxNumberOfFeeds" /><br>
+                    <div class="options__row">
+                        <div class="options__cell">
+                            <label for="openSiteOnIconClick" class="label" data-locale-value="OpenSiteOnIconClick"></label>
+                        </div>
+                        <div class="options__cell">
+                            <input id="openSiteOnIconClick" type="checkbox" data-option-name="openSiteOnIconClick" />
+                            <br>
+                        </div>
+                    </div>
 
-                <label for="oldestFeedsFirst" class="label" data-locale-value="OldestFeedsFirst"></label>
-                <input id="oldestFeedsFirst" type="checkbox" data-disable-parent="openSiteOnIconClick" data-option-name="oldestFeedsFirst" /><br>
+                    <div class="options__row">
+                        <div class="options__cell">
+                            <label for="openFeedsInBackground" class="label" data-locale-value="OpenFeedsInBackground"></label>
+                        </div>
+                        <div class="options__cell">
+                            <input id="openFeedsInBackground" type="checkbox" data-disable-parent="openSiteOnIconClick" data-option-name="openFeedsInBackground" />
+                            <br>
+                        </div>
+                    </div>
 
-                <label for="popupFontSize" class="label" data-locale-value="PopupFontSize"></label>
-                <input id="popupFontSize" type="number" data-disable-parent="openSiteOnIconClick" min="70" max="150" data-option-name="popupFontSize" /><br>
+                    <div class="options__row">
+                        <div class="options__cell">
+                            <label for="abilitySaveFeeds" class="label" data-locale-value="AbilitySaveFeeds"></label>
+                        </div>
+                        <div class="options__cell">
+                            <input id="abilitySaveFeeds" type="checkbox" data-disable-parent="openSiteOnIconClick" data-option-name="abilitySaveFeeds" />
+                            <br>
+                        </div>
+                    </div>
 
-                <label for="popupWidth" class="label" data-locale-value="PopupWidth"></label>
-                <input id="popupWidth" type="number" data-disable-parent="openSiteOnIconClick" min="380" max="750" data-option-name="popupWidth" /><br>
+                    <div class="options__row">
+                        <div class="options__cell">
+                            <label for="maxNumberOfFeeds" class="label" data-locale-value="MaxNumberOfFeeds"></label>
+                        </div>
+                        <div class="options__cell">
+                            <input id="maxNumberOfFeeds" type="number" data-disable-parent="openSiteOnIconClick" min="1" max="60" data-option-name="maxNumberOfFeeds" />
+                            <br>
+                        </div>
+                    </div>
 
-                <label for="expandedPopupWidth" class="label" data-locale-value="ExpandedPopupWidth"></label>
-                <input id="expandedPopupWidth" type="number" data-disable-parent="openSiteOnIconClick" min="380" max="750" data-option-name="expandedPopupWidth" /><br>
+                    <div class="options__row">
+                        <div class="options__cell">
+                            <label for="oldestFeedsFirst" class="label" data-locale-value="OldestFeedsFirst"></label>
+                        </div>
+                        <div class="options__cell">
+                            <input id="oldestFeedsFirst" type="checkbox" data-disable-parent="openSiteOnIconClick" data-option-name="oldestFeedsFirst" />
+                            <br>
+                        </div>
+                    </div>
+                    <div class="options__row">
+                        <div class="options__cell">
+                            <label for="popupFontSize" class="label" data-locale-value="PopupFontSize"></label>
+                        </div>
+                        <div class="options__cell">
+                            <input id="popupFontSize" type="number" data-disable-parent="openSiteOnIconClick" min="70" max="150" data-option-name="popupFontSize" />
+                            <br>
+                        </div>
+                    </div>
+                    <div class="options__row">
+                        <div class="options__cell">
+                            <label for="popupWidth" class="label" data-locale-value="PopupWidth"></label>
+                        </div>
+                        <div class="options__cell">
+                            <input id="popupWidth" type="number" data-disable-parent="openSiteOnIconClick" min="380" max="750" data-option-name="popupWidth" />
+                            <br>
+                        </div>
+                    </div>
+                    <div class="options__row">
+                        <div class="options__cell">
+                            <label for="expandedPopupWidth" class="label" data-locale-value="ExpandedPopupWidth"></label>
+                        </div>
+                        <div class="options__cell">
+                            <input id="expandedPopupWidth" type="number" data-disable-parent="openSiteOnIconClick" min="380" max="750" data-option-name="expandedPopupWidth" />
+                            <br>
+                        </div>
+                    </div>
 
-                <label for="showFullFeedContent" class="label" data-locale-value="ShowFullFeedContent"></label>
-                <input id="showFullFeedContent" type="checkbox" data-disable-parent="openSiteOnIconClick" data-option-name="showFullFeedContent" /><br>
+                    <div class="options__row">
+                        <div class="options__cell">
+                            <label for="showFullFeedContent" class="label" data-locale-value="ShowFullFeedContent"></label>
+                        </div>
+                        <div class="options__cell">
+                            <input id="showFullFeedContent" type="checkbox" data-disable-parent="openSiteOnIconClick" data-option-name="showFullFeedContent" />
+                            <br>
+                        </div>
+                    </div>
 
-                <label for="showCategories" class="label" data-locale-value="ShowCategories"></label>
-                <input id="showCategories" type="checkbox" data-disable-parent="openSiteOnIconClick" data-option-name="showCategories" /><br>
+                    <div class="options__row">
+                        <div class="options__cell">
+                            <label for="showCategories" class="label" data-locale-value="ShowCategories"></label>
+                        </div>
+                        <div class="options__cell">
+                            <input id="showCategories" type="checkbox" data-disable-parent="openSiteOnIconClick" data-option-name="showCategories" />
+                            <br>
+                        </div>
+                    </div>
+                    <div class="options__row">
+                        <div class="options__cell">
+                            <label for="forceUpdateFeeds" class="label" data-locale-value="ForceUpdateFeeds"></label>
+                        </div>
+                        <div class="options__cell">
+                            <input id="forceUpdateFeeds" type="checkbox" data-disable-parent="openSiteOnIconClick" data-option-name="forceUpdateFeeds" />
+                            <br>
+                        </div>
+                    </div>
+                    <div class="options__row">
+                        <div class="options__cell">
+                            <label for="openFeedsInSameTab" class="label" data-locale-value="OpenFeedsInSameTab"></label>
+                        </div>
+                        <div class="options__cell">
+                            <input id="openFeedsInSameTab" type="checkbox" data-disable-parent="openSiteOnIconClick" data-option-name="openFeedsInSameTab" />
+                            <br>
+                        </div>
+                    </div>
+                    <div class="options__row">
+                        <div class="options__cell">
+                            <label for="expandFeeds" class="label" data-locale-value="ExpandFeeds"></label>
+                        </div>
+                        <div class="options__cell">
+                            <input id="expandFeeds" type="checkbox" data-disable-parent="openSiteOnIconClick" data-option-name="expandFeeds" />
+                            <br>
+                        </div>
+                    </div>
+                </section>
 
-                <label for="forceUpdateFeeds" class="label" data-locale-value="ForceUpdateFeeds"></label>
-                <input id="forceUpdateFeeds" type="checkbox" data-disable-parent="openSiteOnIconClick" data-option-name="forceUpdateFeeds" /><br>
+                <section class="options__section">
+                    <h3 class="options__section-title" data-locale-value="Notifications"></h3>
 
-                <label for="openFeedsInSameTab" class="label" data-locale-value="OpenFeedsInSameTab"></label>
-                <input id="openFeedsInSameTab" type="checkbox" data-disable-parent="openSiteOnIconClick" data-option-name="openFeedsInSameTab" /><br>
+                    <div class="options__row">
+                        <div class="options__cell">
+                            <label for="showDesktopNotifications" class="label" data-locale-value="ShowDesktopNotifications"></label>
+                        </div>
+                        <div class="options__cell">
+                            <input id="showDesktopNotifications" type="checkbox" data-option-name="showDesktopNotifications" />
+                            <br>
+                        </div>
+                    </div>
+                    <div class="options__row">
+                        <div class="options__cell">
+                            <label for="hideNotificationDelay" class="label" data-locale-value="HideNotificationsAfter"></label>
+                        </div>
+                        <div class="options__cell">
+                            <input id="hideNotificationDelay" type="number" data-enable-parent="showDesktopNotifications" min="0" max="3600" data-option-name="hideNotificationDelay" />
+                            <br>
+                        </div>
+                    </div>
+                    <div class="options__row">
+                        <div class="options__cell">
+                            <label for="maxNotificationsCount" class="label" data-locale-value="MaxNotificationsCount"></label>
+                        </div>
+                        <div class="options__cell">
+                            <input id="maxNotificationsCount" type="number" data-enable-parent="showDesktopNotifications" min="1" max="100" data-option-name="maxNotificationsCount" />
+                            <br>
+                        </div>
+                    </div>
+                    <div class="options__row">
+                        <div class="options__cell">
+                            <label for="playSound" class="label" data-locale-value="PlaySound"></label>
+                        </div>
+                        <div class="options__cell">
+                            <input id="playSound" type="checkbox" data-option-name="playSound" />
+                        </div>
+                    </div>
+                </section>
 
-                <label for="expandFeeds" class="label" data-locale-value="ExpandFeeds"></label>
-                <input id="expandFeeds" type="checkbox" data-disable-parent="openSiteOnIconClick" data-option-name="expandFeeds" /><br>
+                <section id="filters-settings" class="options__section">
+                    <h3 class="options__section-title" data-locale-value="Filters"></h3>
 
-                <h3 data-locale-value="Notifications"></h3>
-                <label for="showDesktopNotifications" class="label" data-locale-value="ShowDesktopNotifications"></label>
-                <input id="showDesktopNotifications" type="checkbox" data-option-name="showDesktopNotifications" /><br>
+                    <div class="options__row options__row--parent">
+                        <div class="options__cell">
+                            <label for="isFiltersEnabled" class="label" data-locale-value="UpdateFollowingCategories"></label>
+                        </div>
+                        <div class="options__cell">
+                            <input id="isFiltersEnabled" type="checkbox" data-option-name="isFiltersEnabled" />
+                        </div>
+                    </div>
 
-                <label for="hideNotificationDelay" class="label" data-locale-value="HideNotificationsAfter"></label>
-                <input id="hideNotificationDelay" type="number" data-enable-parent="showDesktopNotifications" min="0" max="3600" data-option-name="hideNotificationDelay" /><br>
+                    <fieldset data-enable-parent="isFiltersEnabled" id="categories" class="categories"></fieldset>
+                </section>
 
-                <label for="maxNotificationsCount" class="label" data-locale-value="MaxNotificationsCount"></label>
-                <input id="maxNotificationsCount" type="number" data-enable-parent="showDesktopNotifications" min="1" max="100" data-option-name="maxNotificationsCount" /><br>
-
-                <label for="playSound" class="label" data-locale-value="PlaySound"></label>
-                <input id="playSound" type="checkbox" data-option-name="playSound" />
-
-                <div id="filters-settings">
-                    <h3 data-locale-value="Filters"></h3>
-                    <label for="isFiltersEnabled" class="label" data-locale-value="UpdateFollowingCategories"></label>
-                    <input id="isFiltersEnabled" type="checkbox" data-option-name="isFiltersEnabled" /><br>
-                    <fieldset data-enable-parent="isFiltersEnabled" id="categories">
-                        <legend data-locale-value="Categories"></legend>
-                    </fieldset>
+            </div>
+            <button type="submit" id="save" data-locale-value="Save" class="button options__btn--save">Save</button>
+        </form>
+        <div id="userInfo" class="profile hidden">
+            <div class="profile__content">
+                <div class="profile__item">
+                    <span class="label profile__label" data-locale-value="CurrentUser"></span>
+                    <span data-value-name="givenName"></span>
+                    <span data-value-name="familyName"></span>
+                </div>
+                <div class="profile__item">
+                    <span class="label profile__label" data-locale-value="Email">Email</span>
+                    <span data-value-name="email"></span>
                 </div>
             </div>
-            <button type="submit" id="save" data-locale-value="Save" class="button">Save</button>
-        </form>
-        <div id="userInfo">
-            <div class="options-section">
-                <span class="label" data-locale-value="CurrentUser"></span>
-                <span data-value-name="givenName"></span>
-                <span data-value-name="familyName"></span><br>
-                <span class="label" data-locale-value="Email">Email</span>
-                <span data-value-name="email"></span>
-            </div>
-            <button type="submit" id="logout" class="button" data-locale-value="Logout"></button>
+            <footer class="profile__footer">
+                <a href="javascript:" id="logout" class="profile__btn-logout" data-locale-value="Logout"></a>
+                <!-- <button type="submit" id="logout" class="button" data-locale-value="Logout"></button> -->
+            </footer>
         </div>
     </div>
 </body>
