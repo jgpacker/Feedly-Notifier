@@ -33,10 +33,10 @@ $(document).ready(function () {
     if (popupGlobal.supportedTimeAgoLocales.indexOf(window.navigator.language) !== -1) {
         //Trying load localization for jQuery.timeago
         $.getScript("/scripts/timeago/locales/jquery.timeago." + window.navigator.language + ".js", function () {
-            renderFeeds();
+            executeAsync(renderFeeds);
         });
     } else {
-        renderFeeds();
+        executeAsync(renderFeeds);
     }
 });
 
@@ -200,6 +200,12 @@ $(".popup").on("click", ".feed-category", function (){
 function openOptions() {
 
     chrome.tabs.create({ url: "options.html" });
+}
+
+function executeAsync(func) {
+    setTimeout(function () {
+        func();
+    }, 0);
 }
 
 function renderFeeds(forceUpdate) {
