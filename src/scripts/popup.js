@@ -33,10 +33,10 @@ $(document).ready(function () {
     if (popupGlobal.supportedTimeAgoLocales.indexOf(window.navigator.language) !== -1) {
         //Trying load localization for jQuery.timeago
         $.getScript("/scripts/timeago/locales/jquery.timeago." + window.navigator.language + ".js", function () {
-            renderFeeds();
+            executeAsync(renderFeeds);
         });
     } else {
-        renderFeeds();
+        executeAsync(renderFeeds);
     }
 });
 
@@ -202,6 +202,12 @@ function openOptions() {
     chrome.tabs.create({ url: "options.html" });
 }
 
+function executeAsync(func) {
+    setTimeout(function () {
+        func();
+    }, 0);
+}
+
 function renderFeeds(forceUpdate) {
     showLoader();
     popupGlobal.backgroundPage.getFeeds(popupGlobal.backgroundPage.appGlobal.options.forceUpdateFeeds || forceUpdate, function (feeds, isLoggedIn) {
@@ -288,11 +294,11 @@ function markAsRead(feedIds) {
     feedItems.attr("data-is-read", "true");
 
     //Show loader if all feeds were read
-    if ($("#feed").find("#feed .feed__article[data-is-read!='true']").size() === 0) {
+    if ($("#feed").find(".feed__article[data-is-read!='true']").size() === 0) {
         showLoader();
     }
     popupGlobal.backgroundPage.markAsRead(feedIds, function () {
-        if ($("#feed").find("#feed .feed__article[data-is-read!='true']").size() === 0) {
+        if ($("#feed").find(".feed__article[data-is-read!='true']").size() === 0) {
             renderFeeds();
         }
     });
