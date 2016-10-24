@@ -209,7 +209,7 @@ function executeAsync(func) {
 }
 
 function renderFeeds(forceUpdate) {
-    showLoader();
+    //showLoader();
     popupGlobal.backgroundPage.getFeeds(popupGlobal.backgroundPage.appGlobal.options.forceUpdateFeeds || forceUpdate, function (feeds, isLoggedIn) {
         popupGlobal.feeds = feeds;
         if (isLoggedIn === false) {
@@ -247,7 +247,7 @@ function renderFeeds(forceUpdate) {
 }
 
 function renderSavedFeeds(forceUpdate) {
-    showLoader();
+    //showLoader();
     popupGlobal.backgroundPage.getSavedFeeds(popupGlobal.backgroundPage.appGlobal.options.forceUpdateFeeds || forceUpdate, function (feeds, isLoggedIn) {
         popupGlobal.savedFeeds = feeds;
         if (isLoggedIn === false) {
