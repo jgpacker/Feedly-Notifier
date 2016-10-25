@@ -1,7 +1,8 @@
-@import url('https://fonts.googleapis.com/css?family=Noto+Sans');
+@import url('https://fonts.googleapis.com/css?family=Noto+Sans&amp;subset=cyrillic,cyrillic-ext,devanagari,greek,greek-ext,latin-ext,vietnamese');
+@import url(http://fonts.googleapis.com/earlyaccess/notosansjapanese.css);
 
 html, body {
-	font-family: 'Noto Sans', sans-serif;
+	font-family: 'Noto Sans', 'Noto Sans Japanese', sans-serif;
 	font-size: 100%;
     color: #2e343b; /*rgba(68,68,68,0.9);*/
 	text-rendering: optimizeLegibility !important;
