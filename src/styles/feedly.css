@@ -1,8 +1,8 @@
-@import url('https://fonts.googleapis.com/css?family=Noto+Sans');
+@import url('https://fonts.googleapis.com/css?family=Noto+Sans:400,700&amp;subset=cyrillic,cyrillic-ext,devanagari,greek,greek-ext,latin-ext,vietnamese');
 
 html, body {
 	font-family: 'Noto Sans', sans-serif;
-	font-size: 100%;
+	font-size: 10px;
     color: #2e343b; /*rgba(68,68,68,0.9);*/
 	text-rendering: optimizeLegibility !important;
 	-webkit-font-smoothing: antialiased !important;
@@ -71,7 +71,7 @@ a {
 	display: none;
 	min-width: 380px;
 	/*max-width: 600px;*/
-	
+
 }
 
 .popup__header {
@@ -125,7 +125,7 @@ a {
 /*font-family: 'Open Sans', arial, sans-serif;*/
 	/*margin-top: -2px;*/
 	margin-left: 5px;
-	font-size: 0.9em;
+	font-size: 12px;
 	font-weight: 500;
     color: #262626;
 }
@@ -175,13 +175,13 @@ a {
 .feed--empty {
 	margin-top: 10px;
 	font-weight: 600;
-	font-size: 0.85em;
+	font-size: 1.4rem;
 	text-align: center;
+    padding: 10px 0;
 }
 
 .article {
 	border-top: 1px solid #EFEFEF;
-	font-size: 0.65em;
     -webkit-font-smoothing: antialiased;
     padding: 0 10px 0;
     position: relative;
@@ -217,24 +217,23 @@ a {
 .article__title {
 	margin: 0;
     padding: 7px 0;
-    font-size: 0.85em;
+    font-size: 1.19rem;
     font-weight: bolder;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-
-    flex-grow: 1
+    flex-grow: 1;
 }
 
 .article__details {
-	font-size: 0.8em;
+	font-size: 1.12rem;
 	display: flex;
 	flex-wrap: wrap;
 	padding-bottom: 7px;
 }
 
 .article__toolbar{
-	
+
    /* display: none;*/
    width: 0;
     /*margin: 0 0 0 5px;*/
@@ -251,7 +250,7 @@ a {
     width: 90px;
     background: #F6F6F6;
     transition: width 0.2s ease-in-out;
-} 
+}
 
 .article__content {
 	display: none;
@@ -285,7 +284,7 @@ a {
 }
 
 .source {
-	
+
 }
 
 .source__icon {
@@ -299,7 +298,7 @@ a {
 	    line-height: 20px;
 	    color: #777;
 }
- 
+
 .source__text {
 	padding-left: 5px;
 	font-weight: 700;1
@@ -311,8 +310,7 @@ a {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
-
-	font-size: 0.5em;
+	font-size: 12px;
 	margin: 7px 0;
 }
 
@@ -338,7 +336,7 @@ a {
 /* tabs */
 
 .tab-container {
-	font-size: 0.8em;
+	font-size: 13px;
 	display: flex;
 	margin:  2px -10px 0;
 	padding: 0 10px;

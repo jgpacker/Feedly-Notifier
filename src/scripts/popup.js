@@ -9,7 +9,7 @@ var popupGlobal = {
 };
 
 $(document).ready(function () {
-    $("#feed, #feed-saved").css("font-size", popupGlobal.backgroundPage.appGlobal.options.popupFontSize / 100 + "em");
+    $("html").css("font-size", popupGlobal.backgroundPage.appGlobal.options.popupFontSize / 10 + "px");
 
     // toolbar
     //$("#mark-all-read>span").text(chrome.i18n.getMessage("MarkAllAsRead"));
@@ -157,9 +157,9 @@ $(".feed").on("click", ".js-toolbar__action--expand", function () {
         }
     }
     contentContainer.slideToggle("fast", function () {
-        
+
         $($this).toggleClass('toolbar__item--state_animated');
-        
+
         if ($(".article__content").is(":visible")) {
             setPopupExpand(true);
         } else {
@@ -357,7 +357,7 @@ function getUniqueCategories(feeds){
 function showLoader() {
     // TODO: uncomment
     $("body").children("div").hide();
-    $("#loading").show(); 
+    $("#loading").show();
 }
 
 function showLogin() {
@@ -376,9 +376,9 @@ function showFeeds() {
     if (popupGlobal.backgroundPage.appGlobal.options.resetCounterOnClick) {
         popupGlobal.backgroundPage.resetCounter();
     }
-    
+
     $("body").children("div").hide();
-    $(".popup").show(); 
+    $(".popup").show();
 
     $(".popup__content").children(".feed").hide();
     $(".popup__content #feed").show();
@@ -393,7 +393,7 @@ function showFeeds() {
 function showSavedFeeds() {
 
     $("body").children("div").hide();
-    $(".popup").show(); 
+    $(".popup").show();
 
     $(".popup__content").children(".feed").hide();
     $(".popup__content #feed-saved").show();
