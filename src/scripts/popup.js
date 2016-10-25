@@ -402,6 +402,7 @@ function showSavedFeeds() {
     $(".header__toolbar #mark-all-read.toolbar__item").hide();
     $(".header__toolbar #open-all-news.toolbar__item").hide();
 
+    $(".js-toolbar__action--mark-as-readed").hide();
     $(".js-toolbar__action--expand").attr("title", chrome.i18n.getMessage("More"));
 }
 
