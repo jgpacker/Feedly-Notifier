@@ -1,11 +1,58 @@
-"use strict";
+import * as browser from 'webextension-polyfill';
+import FeedlyApiClient from './feedly.api';
+import {
+    FeedlyUnreadCount,
+    FeedlySubscription,
+    FeedlyStream,
+    FeedlyEntry,
+    FeedlyAuthToken,
+    MarkerCounts,
+    FeedlyEntryOrigin
+} from './feedly';
+import { Feed, FeedCategory } from './models';
 
-import browser from 'webextension-polyfill';
-import FeedlyApiClient from './feedly.api.js';
+enum Browser {
+    Chrome = "chrome",
+    Firefox = "firefox",
+    Opera = "opera"
+}
 
-var appGlobal = {
+export interface ExtensionBackground {
+    
+}
+
+interface Background {
+    options: Options;
+    cachedFeeds: Feed[];
+    cachedSavedFeeds: Feed[];
+    isLoggedIn: boolean;
+    clientId: string;
+    clientSecret: string;
+    intervalIds: number[];
+    browser: Browser;
+    tokenIsRefreshing: false;
+    tokenRefreshingPromise?: Promise<any>;
+    getUserSubscriptionsPromise?: Promise<any>;
+    readonly syncStorage: chrome.storage.StorageArea;
+    readonly feedlyUrl: string;
+    readonly savedGroup: string;
+    readonly globalGroup: string;
+    readonly globalUncategorized: string;
+    [key: string]: any;
+}
+
+interface Options {
+    [key: string]: any
+}
+
+declare let BROWSER: Browser;
+declare let CLIENT_ID: string;
+declare let CLIENT_SECRET: string;
+
+var appGlobal: Background = {
     feedlyApiClient: new FeedlyApiClient(),
     feedTab: null,
+    feedTabId: null,
     icons: {
         default: {
             "19": "/images/icon.png",
@@ -38,7 +85,7 @@ var appGlobal = {
         isFiltersEnabled: false,
         openFeedsInSameTab: false,
         openFeedsInBackground: true,
-        filters: [],
+        filters: (<string[]>[]),
         showCounter: true,
         playSound: false,
         oldestFeedsFirst: false,
@@ -86,20 +133,33 @@ var appGlobal = {
         }
     },
     //Names of options after changes of which scheduler will be initialized
-    criticalOptionNames: ["updateInterval", "accessToken", "showFullFeedContent", "openSiteOnIconClick",
-        "maxNumberOfFeeds", "abilitySaveFeeds", "filters", "isFiltersEnabled",
-        "showCounter", "oldestFeedsFirst", "resetCounterOnClick", "grayIconColorIfNoUnread"],
+    criticalOptionNames: [
+        "updateInterval", 
+        "accessToken", 
+        "showFullFeedContent", 
+        "openSiteOnIconClick",
+        "maxNumberOfFeeds", 
+        "abilitySaveFeeds", 
+        "filters", 
+        "isFiltersEnabled",
+        "showCounter", 
+        "oldestFeedsFirst", 
+        "resetCounterOnClick", 
+        "grayIconColorIfNoUnread"
+    ],
     cachedFeeds: [],
     cachedSavedFeeds: [],
-    notifications: {},
+    notifications: (<{[key:string]:any}>{}),
     isLoggedIn: false,
     intervalIds: [],
     /* eslint-disable no-undef */
     clientId: CLIENT_ID,
     clientSecret: CLIENT_SECRET,
+    browser: BROWSER,
     /* eslint-disable no-undef */
-    tokenRefreshingPromise: null,
-    getUserSubscriptionsPromise: null,
+    tokenIsRefreshing: false,
+    tokenRefreshingPromise: undefined,
+    getUserSubscriptionsPromise: undefined,
     get feedlyUrl(){
         return this.options.useSecureConnection ? "https://feedly.com" : "http://feedly.com";
     },
@@ -113,16 +173,10 @@ var appGlobal = {
         return "user/" + this.options.feedlyUserId + "/category/global.uncategorized";
     },
     get syncStorage(){
-        // @if BROWSER=='firefox'
-        // Firefox doesn't support sync storage
-        return chrome.storage.local;
-        // @endif
-
-        // @if BROWSER!='firefox'
-        /* eslint-disable no-unreachable */
-        return chrome.storage.sync;
-        /* eslint-enable no-unreachable */
-        // @endif
+        let storage = this.browser == Browser.Chrome
+            ? chrome.storage.sync
+            : chrome.storage.local;
+        return storage;
     }
 };
 
@@ -148,7 +202,7 @@ readOptions(function () {
 // @endif
 
 chrome.storage.onChanged.addListener(function (changes) {
-    var callback;
+    let callback: () => void = () => { };
 
     for (var optionName in changes) {
         if (appGlobal.criticalOptionNames.indexOf(optionName) !== -1) {
@@ -156,6 +210,7 @@ chrome.storage.onChanged.addListener(function (changes) {
             break;
         }
     }
+
     readOptions(callback);
 });
 
@@ -170,7 +225,7 @@ chrome.webRequest.onCompleted.addListener(function (details) {
     if (details.method === "POST" || details.method === "DELETE") {
         updateCounter();
         updateFeeds();
-        appGlobal.getUserSubscriptionsPromise = null;
+        appGlobal.getUserSubscriptionsPromise = undefined;
     }
 }, {urls: ["*://*.feedly.com/v3/subscriptions*", "*://*.feedly.com/v3/markers?*ct=feedly.desktop*"]});
 
@@ -204,7 +259,7 @@ function initialize() {
     startSchedule(appGlobal.options.updateInterval);
 }
 
-function startSchedule(updateInterval) {
+function startSchedule(updateInterval: number) {
     stopSchedule();
     updateCounter();
     updateFeeds();
@@ -252,7 +307,7 @@ chrome.notifications.onButtonClicked.addListener(function(notificationId, button
 });
 
 /* Sends desktop notifications */
-function sendDesktopNotification(feeds) {
+function sendDesktopNotification(feeds: Feed[]) {
 
     //if notifications too many, then to show only count
     let maxNotifications = appGlobal.options.maxNotificationsCount;
@@ -299,7 +354,7 @@ function sendDesktopNotification(feeds) {
         // @endif
     }
 
-    function createNotifications(feeds, showBlogIcons, showThumbnails) {
+    function createNotifications(feeds: Feed[], showBlogIcons: boolean, showThumbnails: boolean) {
         for (let feed of feeds) {
             let notificationType = 'basic';
             // @if BROWSER=='chrome'
@@ -308,20 +363,22 @@ function sendDesktopNotification(feeds) {
             }
             // @endif
 
-            chrome.notifications.create(feed.id, {
+            let notificationOptions: chrome.notifications.NotificationOptions = {
                 type: notificationType,
                 title: feed.blog,
                 message: feed.title,
-                iconUrl: showBlogIcons ? feed.blogIcon : appGlobal.icons.defaultBig
+                iconUrl: showBlogIcons ? feed.blogIcon : appGlobal.icons.defaultBig,
                 // @if BROWSER=='chrome'
-                ,imageUrl: showThumbnails ? feed.thumbnail : null
-                ,buttons: [
+                imageUrl: showThumbnails ? feed.thumbnail : undefined,
+                buttons: [
                     {
                         title: chrome.i18n.getMessage("MarkAsRead")
                     }
                 ]
                 // @endif
-            });
+            }
+
+            chrome.notifications.create(feed.id, notificationOptions);
 
             appGlobal.notifications[feed.id] = feed.url;
         }
@@ -332,9 +389,9 @@ function sendDesktopNotification(feeds) {
  * then creates new window and adds tab in the end of it
  * url for open
  * active when is true, then tab will be active */
-function openUrlInNewTab(url, active) {
+function openUrlInNewTab(url: string, active: boolean) {
     browser.windows.getAll({})
-        .then(function (windows) {
+        .then(function (windows: chrome.windows.Window[]) {
             if (windows.length < 1) {
                 return browser.windows.create({focused: true});
             }
@@ -349,18 +406,19 @@ function openUrlInNewTab(url, active) {
 /* Opens new Feedly tab, if tab was already opened, then switches on it and reload. */
 function openFeedlyTab() {
     browser.tabs.query({url: appGlobal.feedlyUrl + "/*"})
-        .then(function (tabs) {
+        .then(function (tabs: chrome.tabs.Tab[]) {
             if (tabs.length < 1) {
                 chrome.tabs.create({url: appGlobal.feedlyUrl});
             } else {
-                chrome.tabs.update(tabs[0].id, {active: true});
-                chrome.tabs.reload(tabs[0].id);
+                let tabId: number = (<number>tabs[0].id);
+                chrome.tabs.update(tabId, {active: true});
+                chrome.tabs.reload(tabId);
             }
         });
 }
 
 /* Removes feeds from cache by feed ID */
-function removeFeedFromCache(feedId) {
+function removeFeedFromCache(feedId: string): void {
     var indexFeedForRemove;
     for (var i = 0; i < appGlobal.cachedFeeds.length; i++) {
         if (appGlobal.cachedFeeds[i].id === feedId) {
@@ -384,7 +442,7 @@ function playSound(){
 /* Returns only new feeds and set date of last feed
  * The callback parameter should specify a function that looks like this:
  * function(object newFeeds) {...};*/
-function filterByNewFeeds(feeds, callback) {
+function filterByNewFeeds(feeds: Feed[], callback: (feeds: Feed[]) => void) {
     chrome.storage.local.get("lastFeedTimeTicks", function (options) {
         var lastFeedTime;
 
@@ -394,7 +452,7 @@ function filterByNewFeeds(feeds, callback) {
             lastFeedTime = new Date(1971, 0, 1);
         }
 
-        var newFeeds = [];
+        let newFeeds: Feed[] = [];
         var maxFeedTime = lastFeedTime;
 
         for (var i = 0; i < feeds.length; i++) {
@@ -425,16 +483,16 @@ function resetCounter(){
  */
 function updateSavedFeeds() {
     return apiRequestWrapper("streams/" + encodeURIComponent(appGlobal.savedGroup) + "/contents")
-        .then(function (response) {
+        .then(function (response: any) {
             return parseFeeds(response);
         })
-        .then(function (feeds) {
+        .then(function (feeds: Feed[]) {
             appGlobal.cachedSavedFeeds = feeds;
         });
 }
 
 /* Sets badge counter if unread feeds more than zero */
-function setBadgeCounter(unreadFeedsCount) {
+function setBadgeCounter(unreadFeedsCount: number) {
     if (appGlobal.options.showCounter) {
         chrome.browserAction.setBadgeText({ text: String(+unreadFeedsCount > 0 ? unreadFeedsCount : "")});
     } else {
@@ -470,16 +528,16 @@ function updateCounter() {
     }
 }
 
-function makeMarkersRequest(parameters){
+function makeMarkersRequest(parameters?: any){
     apiRequestWrapper("markers/counts", {
         parameters: parameters
-    }).then(function (response) {
-        let unreadCounts = response.unreadcounts;
+    }).then(function (response: MarkerCounts) {
+        let unreadCounts: FeedlyUnreadCount[] = response.unreadcounts;
         let unreadFeedsCount = 0;
 
         if (appGlobal.options.isFiltersEnabled) {
             return getUserSubscriptions()
-                .then(function (response) {
+                .then(function (response: FeedlySubscription[]) {
                     unreadCounts.forEach(function (element) {
                         if (appGlobal.options.filters.indexOf(element.id) !== -1) {
                             unreadFeedsCount += element.count;
@@ -533,14 +591,14 @@ function makeMarkersRequest(parameters){
  * Callback will be started after function complete
  * If silentUpdate is true, then notifications will not be shown
  *  */
-function updateFeeds(silentUpdate) {
+function updateFeeds(silentUpdate?: boolean) {
     appGlobal.cachedFeeds = [];
     appGlobal.options.filters = appGlobal.options.filters || [];
 
     let streamIds = appGlobal.options.isFiltersEnabled && appGlobal.options.filters.length
         ? appGlobal.options.filters : [appGlobal.globalGroup];
 
-    let promises = [];
+    let promises: Promise<any>[] = [];
     for (let i = 0; i < streamIds.length; i++) {
         let promise = apiRequestWrapper("streams/" + encodeURIComponent(streamIds[i]) + "/contents", {
             timeout: 10000, // Prevent infinite loading
@@ -556,7 +614,7 @@ function updateFeeds(silentUpdate) {
 
     return Promise.all(promises)
         .then(function (responses) {
-            let parsePromises = responses.map(response => parseFeeds(response));
+            let parsePromises: Promise<Feed[]>[] = responses.map(response => parseFeeds(response));
 
             return Promise.all(parsePromises);
         })
@@ -621,19 +679,24 @@ function setActiveStatus() {
 }
 
 /* Converts feedly response to feeds */
-function parseFeeds(feedlyResponse) {
+function parseFeeds(feedlyResponse: FeedlyStream) {
 
     return getUserSubscriptions()
-        .then(function (subscriptionResponse) {
+        .then(function (subscriptionResponse: FeedlySubscription[]) {
 
-            let subscriptionsMap = {};
+            let subscriptionsMap: {[key: string] : string } = {};
             subscriptionResponse.forEach(item => { subscriptionsMap[item.id] = item.title; });
 
             return feedlyResponse.items.map(function (item) {
 
-                let blogUrl;
+                let blogUrl: string | undefined;
                 try {
-                    blogUrl = item.origin.htmlUrl.match(/http(?:s)?:\/\/[^/]+/i).pop();
+                    if (item.origin) {
+                        let matches = item.origin.htmlUrl.match(/http(?:s)?:\/\/[^/]+/i);
+                        if (matches) {
+                            blogUrl = matches.pop();
+                        }
+                    }
                 } catch (exception) {
                     blogUrl = "#";
                 }
@@ -691,7 +754,7 @@ function parseFeeds(feedlyResponse) {
                     }
                 }
 
-                let categories = [];
+                let categories: FeedCategory[] = [];
                 if (item.categories) {
                     categories = item.categories.map(function (category){
                         return {
@@ -704,24 +767,26 @@ function parseFeeds(feedlyResponse) {
 
                 let googleFaviconUrl = "https://www.google.com/s2/favicons?domain=" + blogUrl + "&alt=feed";
 
-                return {
-                    title: title,
-                    titleDirection: titleDirection,
-                    url: (item.alternate ? item.alternate[0] ? item.alternate[0].href : "" : "") || blogUrl,
-                    blog: blog,
-                    blogTitleDirection: blogTitleDirection,
-                    blogUrl: blogUrl,
-                    blogIcon: "https://i.olsh.me/icon?url=" + blogUrl + "&size=16..64..300&fallback_icon_url=" + googleFaviconUrl,
+                let feed: Feed = {
                     id: item.id,
-                    content: content,
-                    contentDirection: contentDirection,
-                    isoDate: item.crawled ? new Date(item.crawled).toISOString() : "",
-                    date: item.crawled ? new Date(item.crawled) : "",
-                    isSaved: isSaved,
+                    title: <string>title,
+                    titleDirection: titleDirection,
+                    url: <string>((item.alternate ? item.alternate[0] ? item.alternate[0].href : "" : "") || blogUrl),
+                    blog: <string>blog,
+                    blogTitleDirection: <string>blogTitleDirection,
+                    blogUrl: <string>blogUrl,
+                    blogIcon: <string>("https://i.olsh.me/icon?url=" + blogUrl + "&size=16..64..300&fallback_icon_url=" + googleFaviconUrl),
+                    content: <string>content,
+                    contentDirection: <string>contentDirection,
+                    isoDate: new Date(item.crawled).toISOString(),
+                    date: new Date(item.crawled),
+                    isSaved: <boolean>isSaved,
                     categories: categories,
                     author: item.author,
-                    thumbnail: item.thumbnail && item.thumbnail.length > 0 && item.thumbnail[0].url ? item.thumbnail[0].url : null
+                    thumbnail: item.thumbnail && item.thumbnail.length > 0 && item.thumbnail[0].url ? item.thumbnail[0].url : undefined
                 };
+
+                return feed;
             });
         });
 }
@@ -730,7 +795,7 @@ function parseFeeds(feedlyResponse) {
  * If the cache is empty, then it will be updated before return
  * forceUpdate, when is true, then cache will be updated
  */
-function getFeeds(forceUpdate, callback) {
+function getFeeds(forceUpdate: boolean, callback: (feeds: Feed[], isLoggedIn: boolean) => void) {
     if (appGlobal.cachedFeeds.length > 0 && !forceUpdate) {
         callback(appGlobal.cachedFeeds.slice(0), appGlobal.isLoggedIn);
     } else {
@@ -746,7 +811,7 @@ function getFeeds(forceUpdate, callback) {
  * If the cache is empty, then it will be updated before return
  * forceUpdate, when is true, then cache will be updated
  */
-function getSavedFeeds(forceUpdate, callback) {
+function getSavedFeeds(forceUpdate: boolean, callback: (feeds: Feed[], isLoggedIn: boolean) => void) {
     if (appGlobal.cachedSavedFeeds.length > 0 && !forceUpdate) {
         callback(appGlobal.cachedSavedFeeds.slice(0), appGlobal.isLoggedIn);
     } else {
@@ -757,24 +822,26 @@ function getSavedFeeds(forceUpdate, callback) {
     }
 }
 
-function getUserSubscriptions(updateCache) {
+function getUserSubscriptions(updateCache?: boolean): Promise<FeedlySubscription[]> {
     if (updateCache) {
-        appGlobal.getUserSubscriptionsPromise = null;
+        appGlobal.getUserSubscriptionsPromise = undefined;
     }
 
-    appGlobal.getUserSubscriptionsPromise = appGlobal.getUserSubscriptionsPromise || apiRequestWrapper("subscriptions")
-        .then(function (response) {
+    let getUserSubscriptionPromise: Promise<FeedlySubscription[]> = apiRequestWrapper("subscriptions")
+        .then(function (response: any) {
             if (!response) {
-                appGlobal.getUserSubscriptionsPromise = null;
-                return Promise.reject();
+                appGlobal.getUserSubscriptionsPromise = undefined;
+                return Promise.reject("no subscriptions");
             }
 
             return response;
         },function () {
-            appGlobal.getUserSubscriptionsPromise = null;
+            appGlobal.getUserSubscriptionsPromise = undefined;
 
-            return Promise.reject();
+            return Promise.reject("unable to get user subscriptions");
         });
+
+    appGlobal.getUserSubscriptionsPromise = appGlobal.getUserSubscriptionsPromise || getUserSubscriptionPromise;
 
     return appGlobal.getUserSubscriptionsPromise;
 }
@@ -783,7 +850,7 @@ function getUserSubscriptions(updateCache) {
  * array of the ID of feeds
  * The callback parameter should specify a function that looks like this:
  * function(boolean isLoggedIn) {...};*/
-function markAsRead(feedIds, callback) {
+function markAsRead(feedIds: string[], callback?: (isLoggedIn: boolean) => void) {
     apiRequestWrapper("markers", {
         body: {
             action: "markAsRead",
@@ -795,8 +862,8 @@ function markAsRead(feedIds, callback) {
         for (let i = 0; i < feedIds.length; i++) {
             removeFeedFromCache(feedIds[i]);
         }
-        chrome.browserAction.getBadgeText({}, function (feedsCount) {
-            feedsCount = +feedsCount;
+        chrome.browserAction.getBadgeText({}, function (feedsCountString: string) {
+            let feedsCount: number = +feedsCountString;
             if (feedsCount > 0) {
                 feedsCount -= feedIds.length;
                 setBadgeCounter(feedsCount);
@@ -817,7 +884,7 @@ function markAsRead(feedIds, callback) {
  * if saveFeed is true, then save the feeds, else unsafe them
  * The callback parameter should specify a function that looks like this:
  * function(boolean isLoggedIn) {...};*/
-function toggleSavedFeed(feedsIds, saveFeed, callback) {
+function toggleSavedFeed(feedsIds: string[], saveFeed: boolean, callback: (isLoggedIn: boolean) => void) {
     if (saveFeed) {
         apiRequestWrapper("tags/" + encodeURIComponent(appGlobal.savedGroup), {
             method: "PUT",
@@ -834,7 +901,7 @@ function toggleSavedFeed(feedsIds, saveFeed, callback) {
             }
         });
     } else {
-        apiRequestWrapper("tags/" + encodeURIComponent(appGlobal.savedGroup) + "/" + encodeURIComponent(feedsIds), {
+        apiRequestWrapper("tags/" + encodeURIComponent(appGlobal.savedGroup) + "/" + encodeURIComponent(feedsIds.join()), {
             method: "DELETE"
         }).then(function () {
             if (typeof callback === "function") {
@@ -875,14 +942,15 @@ function getAccessToken() {
 
     browser.tabs.create({url: url})
         .then(function () {
-            chrome.tabs.onUpdated.addListener(function processCode(tabId, information) {
+            chrome.tabs.onUpdated.addListener(function processCode(tabId: number, information: chrome.tabs.TabChangeInfo) {
                 let checkStateRegex = new RegExp("state=" + state);
-                if (!checkStateRegex.test(information.url)) {
+                let url: string = (<string>information.url);
+                if (!checkStateRegex.test(url)) {
                     return;
                 }
 
                 let codeParse = /code=(.+?)(?:&|$)/i;
-                let matches = codeParse.exec(information.url);
+                let matches = codeParse.exec(url);
                 if (matches) {
                     appGlobal.feedlyApiClient.request("auth/token", {
                         method: "POST",
@@ -894,7 +962,7 @@ function getAccessToken() {
                             redirect_uri: redirectUri,
                             grant_type: "authorization_code"
                         }
-                    }).then(function (response) {
+                    }).then(function (response: FeedlyAuthToken) {
                         appGlobal.syncStorage.set({
                             accessToken: response.access_token,
                             refreshToken: response.refresh_token,
@@ -943,7 +1011,7 @@ function getUserCategories() {
 function refreshAccessToken(){
     if(!appGlobal.options.refreshToken) {
         appGlobal.tokenIsRefreshing = false;
-        return Promise.reject();
+        return Promise.reject("refreshToken is missing");
     }
 
     return appGlobal.feedlyApiClient.request("auth/token", {
@@ -955,7 +1023,7 @@ function refreshAccessToken(){
             client_secret: appGlobal.clientSecret,
             grant_type: "refresh_token"
         }
-    }).then(function (response) {
+    }).then(function (response: FeedlyAuthToken) {
         appGlobal.syncStorage.set({
             accessToken: response.access_token,
             feedlyUserId: response.id
@@ -967,8 +1035,8 @@ function refreshAccessToken(){
 }
 
 /* Writes all application options in chrome storage and runs callback after it */
-function writeOptions(callback) {
-    var options = {};
+function writeOptions(callback: () => void) {
+    var options: { [key: string] : any } = {};
     for (var option in appGlobal.options) {
         options[option] = appGlobal.options[option];
     }
@@ -980,7 +1048,7 @@ function writeOptions(callback) {
 }
 
 /* Reads all options from chrome storage and runs callback after it */
-function readOptions(callback) {
+function readOptions(callback?: () => void) {
     appGlobal.syncStorage.get(null, function (options) {
         for (var optionName in options) {
             if (typeof appGlobal.options[optionName] === "boolean") {
@@ -998,20 +1066,20 @@ function readOptions(callback) {
     });
 }
 
-function apiRequestWrapper(methodName, settings) {
+function apiRequestWrapper(methodName: string, settings?: any) {
     if (!appGlobal.options.accessToken) {
         if (appGlobal.isLoggedIn) {
             setInactiveStatus();
         }
 
-        return Promise.reject();
+        return Promise.reject("AccessToken required");
     }
 
     settings = settings || {};
     settings.useSecureConnection = appGlobal.options.useSecureConnection;
 
     return appGlobal.feedlyApiClient.request(methodName, settings)
-        .then(function (response) {
+        .then(function (response: any) {
             setActiveStatus();
 
             return response;
@@ -1019,17 +1087,17 @@ function apiRequestWrapper(methodName, settings) {
             appGlobal.tokenRefreshingPromise = appGlobal.tokenRefreshingPromise || refreshAccessToken();
 
             return appGlobal.tokenRefreshingPromise;
-        }).catch(function () {
+        }).catch(function (error: Error) {
             if (appGlobal.isLoggedIn) {
                 setInactiveStatus();
             }
 
-            return Promise.reject();
+            return Promise.reject(error);
         });
 }
 
 // public API for popup and options
-window.Extension = {
+(<any>window).Extension = {
     appGlobal: appGlobal,
 
     login: getAccessToken,

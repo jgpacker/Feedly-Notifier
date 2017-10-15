@@ -1,17 +1,29 @@
 "use strict";
 
 import * as $ from 'jquery';
+import * as DOMPurify from 'dompurify';
+import * as Mustache from 'mustache';
 import 'timeago';
-import DOMPurify from 'dompurify';
-import Mustache from 'mustache';
 
-var popupGlobal = {
+import {
+    Feed,
+    FeedCategory
+} from './models';
+
+interface Popup {
+    supportedTimeAgoLocales: string[],
+    feeds: Feed[],
+    savedFeeds: Feed[],
+    backgroundPage: any 
+}
+
+var popupGlobal: Popup = {
     //Determines lists of supported jQuery.timeago localizations, default localization is en
     supportedTimeAgoLocales: ["ru", "fr", "pt-br", "it", "cs", "zh-CN", "zh-TW", "tr", "es", "ko", "de",
         "uk", "sr", "ja", "ar", "id", "da", "hu", "pt"],
     feeds: [],
     savedFeeds: [],
-    backgroundPage: chrome.extension.getBackgroundPage().Extension
+    backgroundPage: (<any>chrome.extension.getBackgroundPage()).Extension
 };
 
 $(document).ready(function () {
@@ -54,7 +66,9 @@ $("#feed, #feed-saved").on("mousedown", "a", function (event) {
 
         if (isFeed && popupGlobal.backgroundPage.appGlobal.feedTabId && popupGlobal.backgroundPage.appGlobal.options.openFeedsInSameTab) {
             chrome.tabs.update(popupGlobal.backgroundPage.appGlobal.feedTabId, {url: url}, function(tab) {
-                onOpenCallback(isFeed, tab);
+                if (tab) {
+                    onOpenCallback(isFeed, tab);
+                }
             })
         } else {
             chrome.tabs.create({url: url, active: isActiveTab }, function(tab) {
@@ -63,7 +77,7 @@ $("#feed, #feed-saved").on("mousedown", "a", function (event) {
         }
     }
 
-    function onOpenCallback(isFeed, tab) {
+    function onOpenCallback(isFeed: boolean, tab: chrome.tabs.Tab) {
         if (isFeed) {
             popupGlobal.backgroundPage.appGlobal.feedTabId = tab.id;
 
@@ -197,7 +211,7 @@ $("#feedly").on("click", "#feedly-logo", function (event) {
     }
 });
 
-function executeAsync(func) {
+function executeAsync(func: () => void) {
     chrome.runtime.getPlatformInfo(function (platformInfo) {
         let timeout = 0;
 
@@ -212,9 +226,9 @@ function executeAsync(func) {
     });
 }
 
-function renderFeeds(forceUpdate) {
+function renderFeeds(forceUpdate?: boolean): void {
     showLoader();
-    popupGlobal.backgroundPage.getFeeds(popupGlobal.backgroundPage.appGlobal.options.forceUpdateFeeds || forceUpdate, function (feeds, isLoggedIn) {
+    popupGlobal.backgroundPage.getFeeds(popupGlobal.backgroundPage.appGlobal.options.forceUpdateFeeds || forceUpdate, function (feeds: Feed[], isLoggedIn: boolean) {
         popupGlobal.feeds = feeds;
         if (isLoggedIn === false) {
             showLogin();
@@ -244,9 +258,9 @@ function renderFeeds(forceUpdate) {
     });
 }
 
-function renderSavedFeeds(forceUpdate) {
+function renderSavedFeeds(forceUpdate?: boolean): void {
     showLoader();
-    popupGlobal.backgroundPage.getSavedFeeds(popupGlobal.backgroundPage.appGlobal.options.forceUpdateFeeds || forceUpdate, function (feeds, isLoggedIn) {
+    popupGlobal.backgroundPage.getSavedFeeds(popupGlobal.backgroundPage.appGlobal.options.forceUpdateFeeds || forceUpdate, function (feeds: Feed[], isLoggedIn: boolean) {
         popupGlobal.savedFeeds = feeds;
         if (isLoggedIn === false) {
             showLogin();
@@ -276,7 +290,7 @@ function renderSavedFeeds(forceUpdate) {
     });
 }
 
-function markAsRead(feedIds) {
+function markAsRead(feedIds: string[]): void {
     var feedItems = $();
     for (var i = 0; i < feedIds.length; i++) {
         feedItems = feedItems.add(".item[data-id='" + feedIds[i] + "']");
@@ -299,7 +313,7 @@ function markAsRead(feedIds) {
     });
 }
 
-function markAsUnSaved(feedIds) {
+function markAsUnSaved(feedIds: string[]) {
     var feedItems = $();
     for (var i = 0; i < feedIds.length; i++) {
         feedItems = feedItems.add(".item[data-id='" + feedIds[i] + "']");
@@ -312,7 +326,7 @@ function markAsUnSaved(feedIds) {
 }
 
 function markAllAsRead() {
-    var feedIds = [];
+    var feedIds: string[] = [];
     $(".item:visible").each(function (key, value) {
         feedIds.push($(value).data("id"));
     });
@@ -320,14 +334,14 @@ function markAllAsRead() {
 }
 
 function markAllAsUnsaved() {
-    var feedIds = [];
+    var feedIds: string[] = [];
     $(".item:visible").each(function (key, value) {
         feedIds.push($(value).data("id"));
     });
     markAsUnSaved(feedIds);
 }
 
-function renderCategories(container, feeds){
+function renderCategories(container: JQuery<HTMLElement>, feeds: Feed[]){
     $(".categories").remove();
     var categories = getUniqueCategories(feeds);
     var template = $("#categories-template").html();
@@ -335,9 +349,9 @@ function renderCategories(container, feeds){
     container.append(Mustache.render(template, {categories: categories}));
 }
 
-function getUniqueCategories(feeds){
-    var categories = [];
-    var addedIds = [];
+function getUniqueCategories(feeds: Feed[]){
+    var categories: FeedCategory[] = [];
+    var addedIds: string[] = [];
     feeds.forEach(function(feed){
         feed.categories.forEach(function (category) {
             if (addedIds.indexOf(category.id) === -1) {
@@ -388,7 +402,7 @@ function showSavedFeeds() {
     $("#feedly").show().find("#popup-actions").show().children().filter(".icon-refresh").show();
 }
 
-function setPopupExpand(isExpand) {
+function setPopupExpand(isExpand: boolean) {
     if (isExpand) {
         $("#feed, #feed-saved").width(popupGlobal.backgroundPage.appGlobal.options.expandedPopupWidth);
     } else {

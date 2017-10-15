@@ -65,9 +65,9 @@ var plugins = [
 
 var options = {
     entry: {
-        popup: path.join(__dirname, "src", "scripts", "popup.js"),
-        options: path.join(__dirname, "src", "scripts", "options.js"),
-        background: path.join(__dirname, "src", "scripts", "background.js")
+        popup: path.join(__dirname, "src", "scripts", "popup.ts"),
+        options: path.join(__dirname, "src", "scripts", "options.ts"),
+        background: path.join(__dirname, "src", "scripts", "background.ts")
     },
     output: {
         path: path.join(__dirname, "build"),
@@ -76,13 +76,13 @@ var options = {
     module: {
         rules: [
             {
-                test: /feedly\.api\.js/,
+                test: /feedly\.api\.ts/,
                 exclude: /node_modules/,
                 loader: StringReplacePlugin.replace({
                     replacements: [
                         {
                             pattern: /http(?:s)?:\/\/(?:www\.)?cloud\.feedly\.com/gi,
-                            replacement: function (match, p1, offset, string) {
+                            replacement: function (match) {
                                 return argv.sandbox ? sandboxUrl : match;
                             }
                         }
@@ -90,13 +90,13 @@ var options = {
                 })
             },
             {
-                test: /background\.js/,
+                test: /background\.ts/,
                 exclude: /node_modules/,
                 loader: StringReplacePlugin.replace({
                     replacements: [
                         {
                             pattern: /http(?:s)?:\/\/(?:www\.)?feedly\.com/gi,
-                            replacement: function (match, p1, offset, string) {
+                            replacement: function (match) {
                                 return argv.sandbox ? sandboxUrl : match;
                             }
                         }
@@ -104,20 +104,20 @@ var options = {
                 })
             },
             {
-                test: /.js$/,
+                test: /.ts$/,
                 exclude: /node_modules/,
                 use: [
-                    // {
-                    //     loader: "echo-loader",
-                    // },
+                    {
+                        loader: "echo-loader",
+                    },
+                    {
+                        loader: 'ts-loader'
+                    },
                     {
                         loader: 'preprocess-loader',
                         options: {
                             BROWSER: argv.browser
                         }
-                    },
-                    {
-                        loader: "eslint-loader"
                     }
                 ]
             },
@@ -127,7 +127,7 @@ var options = {
                 exclude: /node_modules/
             },
             {
-                test: new RegExp('\.(' + fileExtensions.join('|') + ')$'),
+                test: new RegExp('.(' + fileExtensions.join('|') + ')$'),
                 loader: "file-loader?name=[name].[ext]",
                 exclude: /node_modules/
             },
@@ -152,7 +152,8 @@ var options = {
         ]
     },
     resolve: {
-        alias: alias
+        alias: alias,
+        extensions: [".ts", ".js"]
     },
     plugins: plugins
 };

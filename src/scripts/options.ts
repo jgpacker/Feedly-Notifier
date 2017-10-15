@@ -2,6 +2,9 @@
 
 import * as $ from 'jquery';
 
+import { FeedlyCategory } from './feedly';
+import { ExtensionBackground } from './background';
+
 var optionsGlobal = {
     backgroundPermission: {
         permissions: ["background"]
@@ -9,7 +12,7 @@ var optionsGlobal = {
     allSitesPermission: {
         origins: ["<all_urls>"]
     },
-    backgroundPage: chrome.extension.getBackgroundPage().Extension
+    backgroundPage: (<any>chrome.extension.getBackgroundPage()).Extension
 };
 
 $(document).ready(function () {
@@ -19,7 +22,7 @@ $(document).ready(function () {
 });
 
 $("body").on("click", "#save", function (e) {
-    var form = document.getElementById("options");
+    let form = (<HTMLFormElement>document.getElementById("options"));
     if (form.checkValidity()) {
         e.preventDefault();
         saveOptions();
@@ -47,7 +50,7 @@ $("#options").on("change", "input", function () {
 });
 
 function loadProfileData() {
-    optionsGlobal.backgroundPage.getUserInfo().then(function (result) {
+    optionsGlobal.backgroundPage.getUserInfo().then(function (result: any) {
         var userInfo = $("#userInfo");
         userInfo.find("[data-locale-value]").each(function () {
             var textBox = $(this);
@@ -65,21 +68,21 @@ function loadProfileData() {
 
 function loadUserCategories() {
     optionsGlobal.backgroundPage.getUserCategories()
-        .then(function (result) {
+        .then(function (result: FeedlyCategory[]) {
             result.forEach(function (element) {
                 appendCategory(element.id, element.label);
             });
             appendCategory(optionsGlobal.backgroundPage.appGlobal.globalUncategorized, "Uncategorized");
-            optionsGlobal.backgroundPage.appGlobal.syncStorage.get("filters", function (items) {
+            optionsGlobal.backgroundPage.appGlobal.syncStorage.get("filters", function (items: any) {
                 let filters = items.filters || [];
-                filters.forEach(function (id) {
+                filters.forEach(function (id: string) {
                     $("#categories").find("input[data-id='" + id + "']").attr("checked", "checked");
                 });
             });
         });
 }
 
-function appendCategory(id, label) {
+function appendCategory(id: string, label: string) {
     var categories = $("#categories");
     var $label = $("<label for='" + id + "' class='label' />").text(label);
     var $checkbox = $("<input id='" + id + "' type='checkbox' />").attr("data-id", id);
@@ -89,7 +92,7 @@ function appendCategory(id, label) {
 }
 
 function parseFilters() {
-    var filters = [];
+    var filters: string[] = [];
     $("#categories").find("input[type='checkbox']:checked").each(function (key, value) {
         var checkbox = $(value);
         filters.push(checkbox.data("id"));
@@ -99,7 +102,7 @@ function parseFilters() {
 
 /* Save all option in the chrome storage */
 function saveOptions() {
-    var options = {};
+    var options: { [key: string]: any } = {};
     $("#options").find("input[data-option-name]").each(function (optionName, value) {
         var optionControl = $(value);
         var optionValue;
@@ -133,7 +136,7 @@ function loadOptions() {
     });
     // @endif
 
-    optionsGlobal.backgroundPage.appGlobal.syncStorage.get(null, function (items) {
+    optionsGlobal.backgroundPage.appGlobal.syncStorage.get(null, function (items: { [key: string] : any }) {
         var optionsForm = $("#options");
         for (var option in items) {
             var optionControl = optionsForm.find("input[data-option-name='" + option + "']");
@@ -162,7 +165,7 @@ function loadOptions() {
 }
 
 // @if BROWSER='chrome'
-function setBackgroundMode(enable) {
+function setBackgroundMode(enable: boolean) {
     if (enable) {
         chrome.permissions.request(optionsGlobal.backgroundPermission, function () {
         });
@@ -173,7 +176,7 @@ function setBackgroundMode(enable) {
 }
 // @endif
 
-function setAllSitesPermission(enable, options, callback) {
+function setAllSitesPermission(enable: boolean, options: { [key: string] : any }, callback: () => void) {
     if (enable) {
         chrome.permissions.request(optionsGlobal.allSitesPermission, function (granted) {
             if ($("#showThumbnailInNotifications").is(":checked")) {

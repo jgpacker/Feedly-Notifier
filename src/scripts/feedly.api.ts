@@ -1,18 +1,22 @@
-"use strict";
+export default class FeedlyApiClient {
 
-let FeedlyApiClient = function(accessToken) {
+    public accessToken: string;
+    private apiUrl :string;
+    private secureApiUrl :string;
+    private extensionVersion :string;
 
-    this.accessToken = accessToken;
+    constructor() {
+        this.apiUrl = "http://cloud.feedly.com/v3/";
+        this.secureApiUrl = "https://cloud.feedly.com/v3/";
+        this.extensionVersion = chrome.runtime.getManifest().version;
+    }
 
-    let apiUrl = "http://cloud.feedly.com/v3/";
-    let secureApiUrl = "https://cloud.feedly.com/v3/";
-    let extensionVersion = chrome.runtime.getManifest().version;
-
-    this.getMethodUrl = function (methodName, parameters, useSecureConnection) {
+    public getMethodUrl(methodName: string, parameters: any, useSecureConnection: boolean) {
         if (methodName === undefined) {
             return "";
         }
-        let methodUrl = (useSecureConnection ? secureApiUrl : apiUrl) + methodName;
+
+        let methodUrl = (useSecureConnection ? this.secureApiUrl : this.apiUrl) + methodName;
 
         let queryString = "?";
         for (let parameterName in parameters) {
@@ -32,15 +36,15 @@ let FeedlyApiClient = function(accessToken) {
         browserPrefix = "f";
         // @endif
 
-        queryString += "av=" + browserPrefix + extensionVersion;
+        queryString += "av=" + browserPrefix + this.extensionVersion;
 
         methodUrl += queryString;
 
         return methodUrl;
     };
 
-    this.request = function (methodName, settings) {
-        function status(response) {
+    public request(methodName: string, settings: any) {
+        function status(response: Response) {
             if (response.status === 200) {
                 return Promise.resolve(response);
             } else {
@@ -48,7 +52,7 @@ let FeedlyApiClient = function(accessToken) {
             }
         }
 
-        function json(response) {
+        function json(response: Response) {
             return response.json();
         }
 
@@ -60,12 +64,12 @@ let FeedlyApiClient = function(accessToken) {
             url += ((/\?/).test(url) ? "&" : "?") + "ck=" + (new Date()).getTime();
         }
 
-        let headers = {};
+        let headers: any = {};
         if (this.accessToken) {
             headers.Authorization = "OAuth " + this.accessToken;
         }
 
-        let requestParameters = {
+        let requestParameters: RequestInit = {
             method: verb,
             headers: headers
         };
@@ -79,5 +83,3 @@ let FeedlyApiClient = function(accessToken) {
             .then(json);
     };
 };
-
-export default FeedlyApiClient;
