@@ -23,7 +23,7 @@ var popupGlobal: Popup = {
         "uk", "sr", "ja", "ar", "id", "da", "hu", "pt"],
     feeds: [],
     savedFeeds: [],
-    backgroundPage: (<any>chrome.extension.getBackgroundPage()).Extension
+    backgroundPage: (<any>chrome.extension.getBackgroundPage()).ExtensionBackgroundPage
 };
 
 $(document).ready(function () {

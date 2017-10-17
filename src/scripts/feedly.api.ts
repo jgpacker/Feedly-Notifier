@@ -11,7 +11,7 @@ export default class FeedlyApiClient {
         this.extensionVersion = chrome.runtime.getManifest().version;
     }
 
-    public getMethodUrl(methodName: string, parameters: any, useSecureConnection: boolean) {
+    public getMethodUrl(methodName: string, parameters: any, useSecureConnection: boolean): string {
         if (methodName === undefined) {
             return "";
         }
@@ -43,7 +43,7 @@ export default class FeedlyApiClient {
         return methodUrl;
     };
 
-    public request(methodName: string, settings: any) {
+    public request(methodName: string, settings: any): Promise<any> {
         function status(response: Response) {
             if (response.status === 200) {
                 return Promise.resolve(response);

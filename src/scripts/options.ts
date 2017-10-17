@@ -3,7 +3,7 @@
 import * as $ from 'jquery';
 
 import { FeedlyCategory } from './feedly';
-import { ExtensionBackground } from './background';
+import { ExtensionBackgroundPage } from './background';
 
 var optionsGlobal = {
     backgroundPermission: {
@@ -12,7 +12,7 @@ var optionsGlobal = {
     allSitesPermission: {
         origins: ["<all_urls>"]
     },
-    backgroundPage: (<any>chrome.extension.getBackgroundPage()).Extension
+    background: (<any>chrome.extension.getBackgroundPage()).ExtensionBackgroundPage
 };
 
 $(document).ready(function () {
@@ -30,7 +30,7 @@ $("body").on("click", "#save", function (e) {
 });
 
 $("body").on("click", "#logout", function () {
-    optionsGlobal.backgroundPage.logout().then(function () {
+    optionsGlobal.background.logout().then(function () {
         $("#userInfo, #filters-settings").hide();
     });
 });
@@ -50,7 +50,7 @@ $("#options").on("change", "input", function () {
 });
 
 function loadProfileData() {
-    optionsGlobal.backgroundPage.getUserInfo().then(function (result: any) {
+    optionsGlobal.background.getUserInfo().then(function (result: any) {
         var userInfo = $("#userInfo");
         userInfo.find("[data-locale-value]").each(function () {
             var textBox = $(this);
@@ -67,13 +67,13 @@ function loadProfileData() {
 }
 
 function loadUserCategories() {
-    optionsGlobal.backgroundPage.getUserCategories()
+    optionsGlobal.background.getUserCategories()
         .then(function (result: FeedlyCategory[]) {
             result.forEach(function (element) {
                 appendCategory(element.id, element.label);
             });
-            appendCategory(optionsGlobal.backgroundPage.appGlobal.globalUncategorized, "Uncategorized");
-            optionsGlobal.backgroundPage.appGlobal.syncStorage.get("filters", function (items: any) {
+            appendCategory(optionsGlobal.background.appGlobal.globalUncategorized, "Uncategorized");
+            optionsGlobal.background.appGlobal.syncStorage.get("filters", function (items: any) {
                 let filters = items.filters || [];
                 filters.forEach(function (id: string) {
                     $("#categories").find("input[data-id='" + id + "']").attr("checked", "checked");
@@ -83,6 +83,7 @@ function loadUserCategories() {
 }
 
 function appendCategory(id: string, label: string) {
+
     var categories = $("#categories");
     var $label = $("<label for='" + id + "' class='label' />").text(label);
     var $checkbox = $("<input id='" + id + "' type='checkbox' />").attr("data-id", id);
@@ -117,26 +118,23 @@ function saveOptions() {
     });
     options.filters = parseFilters();
 
-    // @if BROWSER='chrome'
+    // @if BROWSER=='chrome'
     setBackgroundMode($("#enable-background-mode").is(":checked"));
     // @endif
 
     setAllSitesPermission($("#showBlogIconInNotifications").is(":checked")
         || $("#showThumbnailInNotifications").is(":checked"), options, function () {
-            optionsGlobal.backgroundPage.appGlobal.syncStorage.set(options, function () {
+            optionsGlobal.background.appGlobal.syncStorage.set(options, function () {
                 alert(chrome.i18n.getMessage("OptionsSaved"));
             });
         });
 }
 
 function loadOptions() {
-    // @if BROWSER='chrome'
-    chrome.permissions.contains(optionsGlobal.backgroundPermission, function (enabled) {
-        $("#enable-background-mode").prop("checked", enabled);
-    });
-    // @endif
 
-    optionsGlobal.backgroundPage.appGlobal.syncStorage.get(null, function (items: { [key: string] : any }) {
+    optionsGlobal.background.getOptions().then((items: {[key: string]: any}) => {
+        console.log(items);
+
         var optionsForm = $("#options");
         for (var option in items) {
             var optionControl = optionsForm.find("input[data-option-name='" + option + "']");
@@ -146,16 +144,9 @@ function loadOptions() {
                 optionControl.val(items[option]);
             }
         }
+        optionsForm.find("input").trigger("change");
+    })
 
-        // @if BROWSER!='firefox'
-        chrome.permissions.contains(optionsGlobal.allSitesPermission, function (enabled) {
-            $("#showBlogIconInNotifications").prop("checked", enabled && items.showBlogIconInNotifications);
-            $("#showThumbnailInNotifications").prop("checked", enabled && items.showThumbnailInNotifications);
-
-            optionsForm.find("input").trigger("change");
-        });
-        // @endif
-    });
     $("#header").text(chrome.i18n.getMessage("FeedlyNotifierOptions"));
     $("#options").find("[data-locale-value]").each(function () {
         var textBox = $(this);
@@ -164,7 +155,7 @@ function loadOptions() {
     });
 }
 
-// @if BROWSER='chrome'
+// @if BROWSER=='chrome'
 function setBackgroundMode(enable: boolean) {
     if (enable) {
         chrome.permissions.request(optionsGlobal.backgroundPermission, function () {

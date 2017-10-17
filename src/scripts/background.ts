@@ -17,8 +17,26 @@ enum Browser {
     Opera = "opera"
 }
 
-export interface ExtensionBackground {
-    
+// public API used by popup page and options page
+export interface ExtensionBackgroundPage {
+
+    appGlobal: Background
+
+    login(): Promise<void>
+    logout(): Promise<void>
+
+    resetCounter(): void
+    openFeedlyTab(): void
+
+    getOptions(): Promise<{[key: string]: OptionValueType}>
+
+    getFeeds(forceUpdate: boolean, callback: (feeds: Feed[], isLoggedIn: boolean) => void): void
+    getSavedFeeds(forceUpdate: boolean, callback: (feeds: Feed[], isLoggedIn: boolean) => void): void
+    markAsRead(feedIds: string[], callback?: (isLoggedIn: boolean) => void): void
+    toggleSavedFeed(feedsIds: string[], saveFeed: boolean, callback: (isLoggedIn: boolean) => void): void
+
+    getUserInfo(): Promise<any>
+    getUserCategories(): Promise<any>
 }
 
 interface Background {
@@ -177,7 +195,13 @@ var appGlobal: Background = {
             ? chrome.storage.sync
             : chrome.storage.local;
         return storage;
-    }
+    },
+    backgroundPermission: {
+        permissions: ["background"]
+    },
+    allSitesPermission: {
+        origins: ["<all_urls>"]
+    },
 };
 
 // #Event handlers
@@ -404,7 +428,7 @@ function openUrlInNewTab(url: string, active: boolean) {
 }
 
 /* Opens new Feedly tab, if tab was already opened, then switches on it and reload. */
-function openFeedlyTab() {
+function openFeedlyTab(): void {
     browser.tabs.query({url: appGlobal.feedlyUrl + "/*"})
         .then(function (tabs: chrome.tabs.Tab[]) {
             if (tabs.length < 1) {
@@ -472,7 +496,7 @@ function filterByNewFeeds(feeds: Feed[], callback: (feeds: Feed[]) => void) {
     });
 }
 
-function resetCounter(){
+function resetCounter(): void{
     setBadgeCounter(0);
     chrome.storage.local.set({ lastCounterResetTime: new Date().getTime() });
 }
@@ -795,7 +819,7 @@ function parseFeeds(feedlyResponse: FeedlyStream) {
  * If the cache is empty, then it will be updated before return
  * forceUpdate, when is true, then cache will be updated
  */
-function getFeeds(forceUpdate: boolean, callback: (feeds: Feed[], isLoggedIn: boolean) => void) {
+function getFeeds(forceUpdate: boolean, callback: (feeds: Feed[], isLoggedIn: boolean) => void): void {
     if (appGlobal.cachedFeeds.length > 0 && !forceUpdate) {
         callback(appGlobal.cachedFeeds.slice(0), appGlobal.isLoggedIn);
     } else {
@@ -811,7 +835,7 @@ function getFeeds(forceUpdate: boolean, callback: (feeds: Feed[], isLoggedIn: bo
  * If the cache is empty, then it will be updated before return
  * forceUpdate, when is true, then cache will be updated
  */
-function getSavedFeeds(forceUpdate: boolean, callback: (feeds: Feed[], isLoggedIn: boolean) => void) {
+function getSavedFeeds(forceUpdate: boolean, callback: (feeds: Feed[], isLoggedIn: boolean) => void): void {
     if (appGlobal.cachedSavedFeeds.length > 0 && !forceUpdate) {
         callback(appGlobal.cachedSavedFeeds.slice(0), appGlobal.isLoggedIn);
     } else {
@@ -850,7 +874,7 @@ function getUserSubscriptions(updateCache?: boolean): Promise<FeedlySubscription
  * array of the ID of feeds
  * The callback parameter should specify a function that looks like this:
  * function(boolean isLoggedIn) {...};*/
-function markAsRead(feedIds: string[], callback?: (isLoggedIn: boolean) => void) {
+function markAsRead(feedIds: string[], callback?: (isLoggedIn: boolean) => void): void {
     apiRequestWrapper("markers", {
         body: {
             action: "markAsRead",
@@ -884,7 +908,7 @@ function markAsRead(feedIds: string[], callback?: (isLoggedIn: boolean) => void)
  * if saveFeed is true, then save the feeds, else unsafe them
  * The callback parameter should specify a function that looks like this:
  * function(boolean isLoggedIn) {...};*/
-function toggleSavedFeed(feedsIds: string[], saveFeed: boolean, callback: (isLoggedIn: boolean) => void) {
+function toggleSavedFeed(feedsIds: string[], saveFeed: boolean, callback: (isLoggedIn: boolean) => void): void {
     if (saveFeed) {
         apiRequestWrapper("tags/" + encodeURIComponent(appGlobal.savedGroup), {
             method: "PUT",
@@ -929,7 +953,8 @@ function toggleSavedFeed(feedsIds: string[], saveFeed: boolean, callback: (isLog
 /**
  * Authenticates the user and stores the access token to browser storage.
  */
-function getAccessToken() {
+function getAccessToken(): Promise<void> {
+    
     let state = (new Date()).getTime();
     let redirectUri = "https://olsh.github.io/Feedly-Notifier/";
     let url = appGlobal.feedlyApiClient.getMethodUrl("auth/auth", {
@@ -940,7 +965,7 @@ function getAccessToken() {
         state: state
     }, appGlobal.options.useSecureConnection);
 
-    browser.tabs.create({url: url})
+    return browser.tabs.create({url: url})
         .then(function () {
             chrome.tabs.onUpdated.addListener(function processCode(tabId: number, information: chrome.tabs.TabChangeInfo) {
                 let checkStateRegex = new RegExp("state=" + state);
@@ -979,7 +1004,7 @@ function getAccessToken() {
  * Logout authenticated user
  * @returns {Promise}
  */
-function logout() {
+function logout(): Promise<void> {
     appGlobal.options.accessToken = "";
     appGlobal.options.refreshToken = "";
     appGlobal.syncStorage.remove(["accessToken", "refreshToken"], function () {});
@@ -991,7 +1016,7 @@ function logout() {
  * Retrieves authenticated user profile info
  * @returns {Promise}
  */
-function getUserInfo() {
+function getUserInfo(): Promise<any> {
     return apiRequestWrapper("profile", {
         useSecureConnection: appGlobal.options.useSecureConnection
     });
@@ -1001,7 +1026,7 @@ function getUserInfo() {
  * Retrieves user categories
  * @returns {Promise}
  */
-function getUserCategories() {
+function getUserCategories(): Promise<any> {
     return apiRequestWrapper("categories");
 }
 
@@ -1066,6 +1091,53 @@ function readOptions(callback?: () => void) {
     });
 }
 
+function getOptions(): Promise<{[key: string]: any}> {
+
+    let options: {[key: string]: any} = {};
+
+    return new Promise(function (resolve, reject) {
+        appGlobal.syncStorage.get(null, function (items: { [key: string] : any }) {
+            
+            for (var option in items) {
+                options[option] = items[option]
+            }
+    
+            let promises: Promise<boolean>[] = [];
+    
+            // @if BROWSER=='chrome'
+            let getBackgroundPermissionPromise = new Promise<boolean>(function (resolve, reject) {
+                chrome.permissions.contains(appGlobal.backgroundPermission, function (enabled) {
+                    resolve(enabled);
+                });
+            });
+            promises.push(getBackgroundPermissionPromise);
+            // @endif
+    
+            // @if BROWSER!='firefox'
+            let getAllSitesPermissionPromise = new Promise<boolean>(function (resolve, reject) {
+                chrome.permissions.contains(appGlobal.allSitesPermission, function (enabled) {
+                    resolve(enabled);
+                });
+            });
+            promises.push(getAllSitesPermissionPromise);
+            // @endif
+    
+            Promise.all(promises).then((results) => {
+                console.log(results);
+    
+                options["enableBackgroundMode"] = results[0];
+                options["showBlogIconInNotifications"] = results[1] && options.showBlogIconInNotifications;
+                options["showThumbnailInNotifications"] = results[1] && options.showThumbnailInNotifications;
+    
+                resolve(options);
+            })
+        });    
+    });
+
+    
+    //return new Promise(resolve);
+}
+
 function apiRequestWrapper(methodName: string, settings?: any) {
     if (!appGlobal.options.accessToken) {
         if (appGlobal.isLoggedIn) {
@@ -1097,19 +1169,24 @@ function apiRequestWrapper(methodName: string, settings?: any) {
 }
 
 // public API for popup and options
-(<any>window).Extension = {
+let background: ExtensionBackgroundPage = {
     appGlobal: appGlobal,
 
     login: getAccessToken,
     logout: logout,
 
-    toggleSavedFeed: toggleSavedFeed,
     openFeedlyTab: openFeedlyTab,
+    resetCounter: resetCounter,
+
     getFeeds: getFeeds,
     getSavedFeeds: getSavedFeeds,    
     markAsRead: markAsRead,
-    resetCounter: resetCounter,
+    toggleSavedFeed: toggleSavedFeed,
+
+    getOptions: getOptions,
 
     getUserInfo: getUserInfo,
     getUserCategories: getUserCategories
 };
+
+(<any>window).ExtensionBackgroundPage = background;
