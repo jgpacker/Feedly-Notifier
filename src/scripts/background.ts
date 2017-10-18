@@ -28,7 +28,8 @@ export interface ExtensionBackgroundPage {
     resetCounter(): void
     openFeedlyTab(): void
 
-    getOptions(): Promise<{[key: string]: OptionValueType}>
+    loadOptions(): Promise<{[key: string]: any}>
+    saveOptions(options: {[key: string]: any}): Promise<void>
 
     getFeeds(forceUpdate: boolean, callback: (feeds: Feed[], isLoggedIn: boolean) => void): void
     getSavedFeeds(forceUpdate: boolean, callback: (feeds: Feed[], isLoggedIn: boolean) => void): void
@@ -1091,7 +1092,8 @@ function readOptions(callback?: () => void) {
     });
 }
 
-function getOptions(): Promise<{[key: string]: any}> {
+/* Load options from storage */
+function loadOptions(): Promise<{[key: string]: any}> {
 
     let options: {[key: string]: any} = {};
 
@@ -1123,19 +1125,55 @@ function getOptions(): Promise<{[key: string]: any}> {
             // @endif
     
             Promise.all(promises).then((results) => {
-                console.log(results);
-    
                 options["enableBackgroundMode"] = results[0];
                 options["showBlogIconInNotifications"] = results[1] && options.showBlogIconInNotifications;
                 options["showThumbnailInNotifications"] = results[1] && options.showThumbnailInNotifications;
-    
                 resolve(options);
             })
         });    
     });
 
-    
-    //return new Promise(resolve);
+}
+
+function saveOptions(options: {[key: string]: any}): Promise<void> {
+
+    return new Promise(function (resolve, reject) {
+        appGlobal.syncStorage.set(options, function () {
+            
+            let promises: Promise<void>[] = [];
+            // @if BROWSER=='chrome'
+            // request/remove background permission
+            let setBackgroundPermissionPromise: Promise<void> = new Promise<void>(function (resolve, reject) {
+                if (options["enableBackgroundMode"]) {
+                    chrome.permissions.request(appGlobal.backgroundPermission, function () {
+                        resolve();
+                    });
+                } else {
+                    chrome.permissions.remove(appGlobal.backgroundPermission, function () {
+                        resolve();
+                    });
+                }
+            });
+            promises.push(setBackgroundPermissionPromise);
+            // @endif
+            // request all urls permission
+            let setAllSitesPermissionPromise: Promise<void> = new Promise<void>(function (resolve, reject) {
+                let isAllSitesPermissionRequired = options["showBlogIconInNotifications"] || options["showThumbnailInNotifications"];
+
+                if (isAllSitesPermissionRequired) {
+                    chrome.permissions.request(appGlobal.allSitesPermission, function (granted) {
+                        resolve();
+                    })
+                } else {
+                    resolve();
+                }
+            });
+            promises.push(setAllSitesPermissionPromise);
+
+            Promise.all(promises).then(() => { resolve(); })
+        });
+    });
+
 }
 
 function apiRequestWrapper(methodName: string, settings?: any) {
@@ -1183,7 +1221,8 @@ let background: ExtensionBackgroundPage = {
     markAsRead: markAsRead,
     toggleSavedFeed: toggleSavedFeed,
 
-    getOptions: getOptions,
+    loadOptions: loadOptions,
+    saveOptions: saveOptions,
 
     getUserInfo: getUserInfo,
     getUserCategories: getUserCategories
